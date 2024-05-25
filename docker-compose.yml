@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  dev-postgres:
+    image: postgres:15.1-alpine
+    container_name: dev-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - dev-network
+networks:
+  dev-network:
