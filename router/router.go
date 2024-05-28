@@ -17,11 +17,11 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	// jwtのmiddlewareを使って認証を行う。USEを使うことで、tasksグループ内の全てのエンドポイントに認証をかけることができる
 	t.Use(echojwt.WithConfig(echojwt.Config{
 		// dbを生成した時と同じSECRETを使う
-		SigningKey:  []byte(os.Getenv("SECRET")),
+		SigningKey:  []byte(os.Getenv("SECRET_KEY")),
 		TokenLookup: "cookie:token",
 	}))
 	t.GET("", tc.GetAllTasks)
-	t.GET("/:taskId", tc.GetTaskByID)
+	t.GET("/:taskId", tc.GetTaskById)
 	t.POST("", tc.CreateTask)
 	t.PUT("/:taskId", tc.UpdateTask)
 	t.DELETE("/:taskId", tc.DeleteTask)
