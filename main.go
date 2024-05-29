@@ -6,15 +6,19 @@ import (
 	"go-echo/repository"
 	"go-echo/router"
 	"go-echo/usecase"
+	"go-echo/validator"
 )
 
 func main() {
 	db := db.NewDB()
+	userValidator := validator.NewUserValidator()
+	taskValidator := validator.NewTaskValidator()
+
 	userRepository := repository.NewUserRepository(db)
 	taskRepository := repository.NewTaskRepository(db)
 
-	userUseCase := usecase.NewUserUsecase(userRepository)
-	taskUseCase := usecase.NewTaskUsecase(taskRepository)
+	userUseCase := usecase.NewUserUsecase(userRepository, userValidator)
+	taskUseCase := usecase.NewTaskUsecase(taskRepository, taskValidator)
 
 	userController := controller.NewUserController(userUseCase)
 	taskController := controller.NewTaskController(taskUseCase)

@@ -3,6 +3,7 @@ package usecase
 import (
 	"go-echo/model"
 	"go-echo/repository"
+	"go-echo/validator"
 	"os"
 	"time"
 
@@ -34,14 +35,18 @@ model.User構造体のフィールドが少数の場合、値コピーのコス�
 
 type userUsecase struct {
 	ur repository.IUserRepository
+	uv validator.IUserValidator
 }
 
 // DIするためのconstructor
-func NewUserUsecase(ur repository.IUserRepository) IUserUsecase {
-	return &userUsecase{ur} // 実体のpointerを&で取得して返している
+func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
+	return &userUsecase{ur, uv} // 実体のpointerを&で取得して返している
 }
 
 func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
+	if error := uu.uv.UserValidate(user); error != nil {
+		return model.UserResponse{}, error
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
 		return model.UserResponse{}, err
@@ -59,6 +64,9 @@ func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
 }
 
 func (uu *userUsecase) Login(user model.User) (string, error) {
+	if error := uu.uv.UserValidate(user); error != nil {
+		return "", error
+	}
 	storeUser := model.User{}
 	if err := uu.ur.GetUserByEmail(&storeUser, user.Email); err != nil {
 		return "", err
