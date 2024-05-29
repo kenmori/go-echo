@@ -15,6 +15,7 @@ type IUserController interface {
 	SignUp(c echo.Context) error
 	Login(c echo.Context) error
 	LogOut(c echo.Context) error
+	CsrfToken(c echo.Context) error
 }
 
 type userController struct {
@@ -71,4 +72,11 @@ func (uc *userController) LogOut(c echo.Context) error {
 	cookie.SameSite = http.SameSiteStrictMode // 今回はフロントとバックが違うドメイン間の通信を行うため、StrictModeを設定
 	c.SetCookie(cookie)                       // httpレスポンスヘッダにcookieをセット
 	return c.NoContent(http.StatusOK)
+}
+
+func (uc *userController) CsrfToken(c echo.Context) error {
+	// cookie := new(http.Cookie)
+	// cookie.Name = "csrfToken"
+	token := c.Get("csrf").(string)
+	return c.JSON(http.StatusOK, echo.Map{"csrf_token": token})
 }
