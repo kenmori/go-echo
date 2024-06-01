@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
 type ITaskController interface {
 	GetAllTasks(c echo.Context) error
-	GetTaskByID(c echo.Context) error
+	GetTaskById(c echo.Context) error
 	CreateTask(c echo.Context) error
 	UpdateTask(c echo.Context) error
 	DeleteTask(c echo.Context) error
@@ -27,28 +27,24 @@ func NewTaskController(tu usecase.ITaskUsecase) ITaskController {
 }
 
 func (tc *taskController) GetAllTasks(c echo.Context) error {
-	// requestからユーザーIDを取得
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
 
-	// 取り出したuserIdがany型なので、float型に型変換して
-	tasks, err := tc.tu.GetAllTasks(uint(userId.(float64)))
+	tasksRes, err := tc.tu.GetAllTasks(uint(userId.(float64)))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, tasks)
+	return c.JSON(http.StatusOK, tasksRes)
 }
 
-func (tc *taskController) GetTaskByID(c echo.Context) error {
-	// jwtをデコードしてuserを取得
+func (tc *taskController) GetTaskById(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
-	id := c.Param("id")
-	// エートゥーアイを使ってstringからint型に変換
+	id := c.Param("taskId")
 	taskId, _ := strconv.Atoi(id)
-	taskRes, err := tc.tu.GetTaskByID(uint(userId.(float64)), uint(taskId))
+	taskRes, err := tc.tu.GetTaskById(uint(userId.(float64)), uint(taskId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -56,12 +52,10 @@ func (tc *taskController) GetTaskByID(c echo.Context) error {
 }
 
 func (tc *taskController) CreateTask(c echo.Context) error {
-
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
 
-	// ゼロ値でtask構造体を作る
 	task := model.Task{}
 	// リクエストオブジェクトの値をtask構造体にバインド
 	if err := c.Bind(&task); err != nil {
@@ -81,6 +75,7 @@ func (tc *taskController) UpdateTask(c echo.Context) error {
 	userId := claims["user_id"]
 	id := c.Param("taskId")
 	taskId, _ := strconv.Atoi(id)
+
 	task := model.Task{}
 	if err := c.Bind(&task); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
@@ -98,9 +93,10 @@ func (tc *taskController) DeleteTask(c echo.Context) error {
 	userId := claims["user_id"]
 	id := c.Param("taskId")
 	taskId, _ := strconv.Atoi(id)
+
 	err := tc.tu.DeleteTask(uint(userId.(float64)), uint(taskId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusNoContent)
 }
