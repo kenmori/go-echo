@@ -53,7 +53,7 @@ func (uc *userController) Login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.Path = "/"
 	cookie.Domain = os.Getenv("API_DOMAIN")
-
+	cookie.Secure = true                      // https通信のみでcookieを送信する
 	cookie.HttpOnly = true                    // client-side scriptからcookieにアクセスできないようにする
 	cookie.SameSite = http.SameSiteStrictMode // 今回はフロントとバックが違うドメイン間の通信を行うため、StrictModeを設定
 	c.SetCookie(cookie)                       // httpレスポンスヘッダにcookieをセット
@@ -67,7 +67,7 @@ func (uc *userController) LogOut(c echo.Context) error {
 	cookie.Expires = time.Now()
 	cookie.Path = "/"
 	cookie.Domain = os.Getenv("API_DOMAIN")
-
+	cookie.Secure = true                      // https通信のみでcookieを送信する
 	cookie.HttpOnly = true                    // client-side scriptからcookieにアクセスできないようにする
 	cookie.SameSite = http.SameSiteStrictMode // 今回はフロントとバックが違うドメイン間の通信を行うため、StrictModeを設定
 	c.SetCookie(cookie)                       // httpレスポンスヘッダにcookieをセット
